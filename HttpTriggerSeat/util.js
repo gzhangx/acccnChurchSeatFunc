@@ -223,7 +223,72 @@ function initParms(pack=2) {
     }
 }
 
+//user has name, email, count
+function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {    
+    let found = null;
+    for (let blki = 0; blki < blks.length; blki++) {
+        const curBlk = blks[blki];
+        let possible = [];
+        let spots = [];
+        let possibleCount = 0;
+        for (let rowi = 0; rowi < curBlk.length; rowi++) {
+            spots = [];
+            const curRow = curBlk[rowi];                                    
+            let left = spacing;
+            let right = 0;
+            for (let ci = 0; ci < curRow.length; ci++) {
+                const cell = curRow[ci];
+                if (!cell) continue;
+                if (!cell.user) {
+                    if (possibleCount < user.count) {
+                        if (left >= spacing) {
+                            possible.push(cell);
+                            possibleCount++;
+                        } else {
+                            left++;                            
+                        }
+                    } else {
+                        right++;
+                        if (right >= spacing && possible) {
+                            spots.push(possible);
+                            possibleCount = 0;
+                            left = 0;
+                            possible = [];
+                        }
+                    }
+                } else {
+                    if (possibleCount) {
+                        possibleCount = 0;
+                        possible = [];
+                        left = 0;
+                        right = 0;
+                    }
+                }
+                if (spots.length > 1) break;
+            }
+
+            if (possibleCount >= user.count) {
+                spots.push(possible);                
+            }
+            if (spots.length === 1) {
+                found = spots[0];
+            } else if (spots.length > 0) {
+                found = spots[1];
+            }
+            if (found) {
+                allUsers.push(user);
+                found.forEach(f => {
+                    f.user = user;
+                });
+                return found;
+            }
+        }
+    }
+    return found;
+}
+
 module.exports = {
     initParms,
     parseSits,
+    tryAddUser,
 }
