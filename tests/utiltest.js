@@ -43,6 +43,9 @@ function test() {
     }
 }
 
+function shoudEqual(a, b, msg) {
+    if (a !== b) console.log(`${msg} expected ${b} but got  ${a}`);
+}
 function testMultiCount() {
     const inited = util.initParms();
     const blks = inited.generateBlockSits();
@@ -54,6 +57,7 @@ function testMultiCount() {
     if (!u1.cell || u1.cell.col != 9) {
         console.log('Bad u1');
     }
+    shoudEqual(u1.cell.dspCol, 5, 'wrong col');
     if (u1.cells[1].col !== 10) {
         console.log('Bad u1');
     }
@@ -71,6 +75,7 @@ function testMultiCount() {
     if (u2.cells[1].col !== 6) {
         console.log('Bad u2');
     }
+    shoudEqual(u2.cell.dspCol, 1, 'wrong col');
     const u3 = {
         count: 2,
         name: 'Test3'

@@ -51,7 +51,7 @@ function parseSits(pack = 2) {
                 const colPos = s.col - rowColMin;
                 return ({
                     sitTag: s.sitTag,
-                    side: colPos < rowCols / 3 ? 'A' : colPos > rowCols * 2 / 3 ? 'C' : 'B',
+                    side: colPos < rowCols / 2 ? 'L' : 'R',
                     col: s.col - b.min,
                     row: s.row - b.minRow,
                 });
@@ -179,8 +179,8 @@ function initParms(pack=2) {
     ///each block: array of rows[r,r,r,r....]
     ///each row: array of seats: {sitTag:X, col,row, blkRow:'A0', blkRowId: 'A0-5', user:{}, uiPos{col,row}}
     function generateBlockSits(preSiteItemsByBlkRowId) {
-        const blockSits = pureSitConfig.map((blk, bi) => {
-            return blk.sits.map(s => {
+        const blockSits = pureSitConfig.map((cblk, bi) => {
+            return cblk.sits.map(s => {
                 return s.map(r => {
                     if (!r) return null;
 
@@ -188,10 +188,11 @@ function initParms(pack=2) {
                         ...r,
                         blkRow: `${blkMap[bi]}${r.row}`,
                         blkRowId: `${blkMap[bi]}${r.row}-${r.col}`,
+                        dspCol: r.side === 'L' ? r.col - cblk.rowColMin[r.row] + cblk.min + 1 : cblk.rowColMax[r.row] - r.col - cblk.min + 1,
                         user: null,
                         uiPos: {
                             col: blockStarts[bi] + r.col,
-                            row: STARTRow + r.row,
+                            row: STARTRow + r.row,                            
                         }
                     };
                     if (preSiteItemsByBlkRowId) {

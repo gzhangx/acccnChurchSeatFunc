@@ -6,6 +6,7 @@ module.exports = async function (context, req) {
     const getPrm = name => req.query[name] || (req.body && req.body[name]);
     const name = getPrm('name');
     const email = getPrm('email');
+    const count = parseInt(getPrm('count') || 1);
     const role = getPrm('role') || 'user';
     const responseMessage = name && email ?`${name} email=${email}`:'Miss name or email';
     
@@ -14,7 +15,7 @@ module.exports = async function (context, req) {
     store.db.blks = blks;
 
     const user = {
-        name, email, count: 1
+        name, email, count
     };
     util.tryAddUser({
         user,
