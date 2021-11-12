@@ -234,21 +234,26 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
         for (let rowi = 0; rowi < curBlk.length; rowi++) {
             spots = [];
             const curRow = curBlk[rowi];                                    
-            let left = spacing;
+            let leftFromPossibleCandidate = spacing;
+            let leftTotal = spacing;
             let right = 0;
             for (let ci = 0; ci < curRow.length; ci++) {
                 const cell = curRow[ci];
                 if (!cell) continue;
                 if (!cell.user) {
                     if (possibleCount < user.count) {
-                        if (left >= spacing) {
+                        if (leftFromPossibleCandidate >= spacing) {
                             possible.push(cell);
                             possibleCount++;
+                            leftFromPossibleCandidate = 0;
                         } else {
-                            left++;                            
+                            leftFromPossibleCandidate++;
                         }
+                        leftTotal++;
                     } else {
                         right++;
+                        leftFromPossibleCandidate++;
+                        leftTotal++;
                         if (right >= spacing && possible) {
                             spots.push(possible);
                             possibleCount = 0;
@@ -259,10 +264,11 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
                 } else {
                     if (possibleCount) {
                         possibleCount = 0;
-                        possible = [];
-                        left = 0;
+                        possible = [];                        
                         right = 0;
                     }
+                    leftFromPossibleCandidate = 0;
+                    leftTotal = 0;
                 }
                 if (spots.length > 1) break;
             }
