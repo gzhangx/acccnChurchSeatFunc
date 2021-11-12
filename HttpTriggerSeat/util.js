@@ -227,14 +227,20 @@ function initParms(pack=2) {
 //user has name, email, count
 function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {    
     let found = null;
-    for (let blki = 0; blki < blks.length; blki++) {
-        const curBlk = blks[blki];
+    let badBlkCount = 0;
+    for (let rowi = 0; badBlkCount < blks.length; rowi++) {            
         let possible = [];
         let spots = [];
         let possibleCount = 0;
-        for (let rowi = 0; rowi < curBlk.length; rowi++) {
+        badBlkCount = 0
+        for (let blki = 0; blki < blks.length; blki++) {
+            const curBlk = blks[blki];
             spots = [];
-            const curRow = curBlk[rowi];                                    
+            const curRow = curBlk[rowi];
+            if (!curRow) {
+                badBlkCount++;                
+                continue;
+            }
             let leftFromPossibleCandidate = spacing;
             let leftTotal = spacing;
             let right = 0;
@@ -291,6 +297,7 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
                 return found;
             }
         }
+        if (rowi < 10) rowi++;
     }
     return found;
 }
