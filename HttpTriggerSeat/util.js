@@ -245,7 +245,7 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
                         if (leftFromPossibleCandidate >= spacing) {
                             possible.push(cell);
                             possibleCount++;
-                            leftFromPossibleCandidate = 0;
+                            if (possibleCount >= user.count) leftFromPossibleCandidate = 0;
                         } else {
                             leftFromPossibleCandidate++;
                         }
@@ -261,12 +261,10 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
                             possible = [];
                         }
                     }
-                } else {
-                    if (possibleCount) {
-                        possibleCount = 0;
-                        possible = [];                        
-                        right = 0;
-                    }
+                } else {                    
+                    possibleCount = 0;
+                    possible = [];
+                    right = 0;
                     leftFromPossibleCandidate = 0;
                     leftTotal = 0;
                 }
@@ -283,8 +281,11 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
             }
             if (found) {
                 allUsers.push(user);
+                user.cells = [];
+                user.cell = found[0];
                 found.forEach(f => {
-                    f.user = user;
+                    f.user = user;                    
+                    user.cells.push(f);
                 });
                 return found;
             }
