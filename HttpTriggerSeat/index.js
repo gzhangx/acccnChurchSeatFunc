@@ -1,3 +1,4 @@
+const util = require('./util');
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
@@ -8,6 +9,11 @@ module.exports = async function (context, req) {
 
     context.res = {
         // status: 200, /* Defaults to 200 */
-        body: responseMessage
+        headers: {
+            'content-type': 'application/json; charset=utf-8'
+        },
+        body: { responseMessage, email: req.query.email, rest: util.initParms().generateBlockSits()},
+        email: req.query.email,
+        
     };
 }
