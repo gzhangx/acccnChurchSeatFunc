@@ -1,5 +1,12 @@
 const fs = require('fs');
 const gs = require('./getSheet');
+
+const blkMap = Object.freeze(['A', 'B', 'C', 'D']);
+const blkLetterToId = blkMap.reduce((acc, ltr, id) => {
+    acc[ltr] = id;
+    return acc;
+}, {});
+
 // returns array of 4 blocks, [ {min,max, minRow, maxRow, rows, cols, rowColMin:[], rowColMax:[], sits:[]}, ..  ]
 // sits: array of rows, each: [null, null, ... { sitTag, col, row}]
 function parseSits(pack = 2) {
@@ -115,14 +122,7 @@ function initParms(pack=2) {
         res: [],
         prev: 0,
         cur: STARTCol - blockSpacing,
-    }).res;
-
-
-    const blkMap = Object.freeze(['A', 'B', 'C', 'D']);
-    const blkLetterToId = blkMap.reduce((acc, ltr, id) => {
-        acc[ltr] = id;
-        return acc;
-    }, {});
+    }).res;    
 
 
     function getDisplayData(blockSits) {
@@ -230,7 +230,7 @@ function getCellInfo(cell) {
         blkName: cell.blkRow[0],
         col: cell.col,
         row: cell.row,
-        dspCow: cell.row + 1,
+        dspRow: cell.row + 1,
         dspCol: cell.dspCol,    
         side: cell.side,
         accessPos: cell.accessPos,
@@ -337,4 +337,5 @@ module.exports = {
     parseSits,
     tryAddUser,
     getNextSundays,
+    blkLetterToId,
 }

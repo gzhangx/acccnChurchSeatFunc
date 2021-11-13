@@ -1,5 +1,7 @@
 const util = require('./util');
 const store = require('./store');
+const blkConfigs = require('./configs');
+
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
@@ -10,15 +12,14 @@ module.exports = async function (context, req) {
     const role = getPrm('role') || 'user';
     const nextSunday = util.getNextSundays()[0];
     
-    const inited = util.initParms();
     await store.initSheet(context, nextSunday);
     const sheetInfo = store.db.sheetInfo.sheetInfo;
-    const blks = store.db.blks || inited.generateBlockSits();
-    store.db.blks = blks;    
+    const blks = store.db.blks || blkConfigs.assignRoles();
+    store.db.blks = blks;
 
     let responseMessage = `Cant find a seat sorry ${name}`;
 
-    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkRow[0]}${cell.row + 1}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
+    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
     const found = store.db.allUsers.find(u => u.email === email);
     if (name && email && !found) {
         const user = {
@@ -33,7 +34,7 @@ module.exports = async function (context, req) {
 
     
         if (res.length === 1) {
-            responseMessage = showCellStr(res[0]);
+            responseMessage = showCellStr(user.cell);
         }
     } else {
         responseMessage = 'No email nor email';
