@@ -6,6 +6,9 @@
     "start": "func start",
     "test": "node tests/utiltest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "superagent": "^6.1.0"
+  },
   "devDependencies": {}
 }

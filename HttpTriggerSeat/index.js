@@ -11,6 +11,8 @@ module.exports = async function (context, req) {
     const nextSunday = util.getNextSundays()[0];
     
     const inited = util.initParms();
+    await store.initSheet(context);
+    const sheetInfo = await store.db.sheet.sheetInfo();
     const blks = store.db.blks || inited.generateBlockSits();
     store.db.blks = blks;
 
@@ -30,12 +32,12 @@ module.exports = async function (context, req) {
         responseMessage = `Dear ${name}, your seat is ${res0.blkRow[0]}${res0.row + 1}, seat ${res0.dspCol} from ${res0.side==='L'?'Left':'Right'} `;
     }
 
-    
+
     context.res = {
         // status: 200, /* Defaults to 200 */
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email, nextSunday},
+        body: { responseMessage, email, nextSunday, sheetInfo},
     };
 }
