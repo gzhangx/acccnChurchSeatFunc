@@ -1,4 +1,5 @@
 const fs = require('fs');
+const gs = require('./getSheet');
 // returns array of 4 blocks, [ {min,max, minRow, maxRow, rows, cols, rowColMin:[], rowColMax:[], sits:[]}, ..  ]
 // sits: array of rows, each: [null, null, ... { sitTag, col, row}]
 function parseSits(pack = 2) {
@@ -302,8 +303,26 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
     return found;
 }
 
+function getDateStr(date) {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+}
+
+function getNextSundays() {
+    let cur = new Date();
+    const oneday = 24 * 60 * 60 * 1000;
+    while (cur.getDay() !== 0) {
+        cur = new Date(cur.getTime() + oneday);
+    }
+    const res = [];
+    for (let i = 0; i < 10; i++) {
+        res[i] = (getDateStr(new Date(cur.getTime() + (oneday * i))));
+    }
+    return res;
+}
+
 module.exports = {
     initParms,
     parseSits,
     tryAddUser,
+    getNextSundays,
 }

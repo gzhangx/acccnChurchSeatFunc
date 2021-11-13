@@ -7,7 +7,8 @@ module.exports = async function (context, req) {
     const name = getPrm('name');
     const email = getPrm('email');
     const count = parseInt(getPrm('count') || 1);
-    const role = getPrm('role') || 'user';    
+    const role = getPrm('role') || 'user';
+    const nextSunday = util.getNextSundays()[0];
     
     const inited = util.initParms();
     const blks = store.db.blks || inited.generateBlockSits();
@@ -29,11 +30,12 @@ module.exports = async function (context, req) {
         responseMessage = `Dear ${name}, your seat is ${res0.blkRow[0]}${res0.row + 1}, seat ${res0.dspCol} from ${res0.side==='L'?'Left':'Right'} `;
     }
 
+    
     context.res = {
         // status: 200, /* Defaults to 200 */
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email},            
+        body: { responseMessage, email, nextSunday},
     };
 }
