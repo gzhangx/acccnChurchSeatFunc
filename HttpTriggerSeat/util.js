@@ -225,6 +225,17 @@ function initParms(pack=2) {
     }
 }
 
+function getCellInfo(cell) {
+    return {
+        blkName: cell.blkRow[0],
+        col: cell.col,
+        row: cell.row,
+        dspCow: cell.row + 1,
+        dspCol: cell.dspCol,    
+        side: cell.side,
+        accessPos: cell.accessPos,
+    }
+}
 //user has name, email, count
 function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {    
     let found = null;
@@ -246,8 +257,9 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
             let leftTotal = spacing;
             let right = 0;
             for (let ci = 0; ci < curRow.length; ci++) {
-                const cell = curRow[ci];
+                const cell = curRow[ci];                
                 if (!cell) continue;
+                cell.accessPos = { b: blki, r: rowi, c: ci };
                 if (!cell.user) {
                     if (possibleCount < user.count) {
                         if (leftFromPossibleCandidate >= spacing) {
@@ -290,10 +302,10 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
             if (found) {
                 allUsers.push(user);
                 user.cells = [];
-                user.cell = found[0];
+                user.cell = getCellInfo(found[0]);
                 found.forEach(f => {
                     f.user = user;                    
-                    user.cells.push(f);
+                    user.cells.push(getCellInfo(f));
                 });
                 return found;
             }
