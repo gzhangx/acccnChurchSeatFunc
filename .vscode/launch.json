@@ -7,12 +7,6 @@
             "request": "attach",
             "port": 9229,
             "preLaunchTask": "func: host start"
-        },
-        {
-            "name": "Test",
-            "type": "node",
-            "request": "attach",
-            "preLaunchTask": "node tests/utiltest"
         }
     ]
 }

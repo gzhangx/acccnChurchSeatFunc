@@ -81,7 +81,7 @@ function testMultiCount() {
         name: 'Test3'
     };
     const res3 = setup(blks, u3).res;
-    if (!res3 || res3.length !== 2 || res3[0].row !== 1 || res3[0].col !== 7) {
+    if (!res3 || res3.length !== 2 || res3[0].row !== 0 || res3[0].col !== 10) {
         console.log('should not have res3');
     }
     
