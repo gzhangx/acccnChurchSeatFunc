@@ -5,31 +5,41 @@ module.exports = async function (context, req) {
 
     const getPrm = name => req.query[name] || (req.body && req.body[name]);
     const name = getPrm('name');
-    const email = getPrm('email');
+    const email = (getPrm('email') || '').toLowerCase().trim();
     const count = parseInt(getPrm('count') || 1);
     const role = getPrm('role') || 'user';
     const nextSunday = util.getNextSundays()[0];
     
     const inited = util.initParms();
-    await store.initSheet(context);
-    const sheetInfo = await store.db.sheet.sheetInfo();
+    await store.initSheet(context, nextSunday);
+    const sheetInfo = store.db.sheetInfo.sheetInfo;
     const blks = store.db.blks || inited.generateBlockSits();
-    store.db.blks = blks;
-
-    const user = {
-        name, email, count
-    };
-    const res = util.tryAddUser({
-        user,
-        blks,
-        allUsers: store.db.allUsers,
-    });
-
+    store.db.blks = blks;    
 
     let responseMessage = `Cant find a seat sorry ${name}`;
-    if (res.length === 1) {
-        const res0 = res[0];
-        responseMessage = `Dear ${name}, your seat is ${res0.blkRow[0]}${res0.row + 1}, seat ${res0.dspCol} from ${res0.side==='L'?'Left':'Right'} `;
+
+    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkRow[0]}${cell.row + 1}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
+    const found = store.db.allUsers.find(u => u.email === email);
+    if (name && email && !found) {
+        const user = {
+            name, email, count
+        };        
+
+        const res = util.tryAddUser({
+            user,
+            blks,
+            allUsers: store.db.allUsers,
+        });
+
+    
+        if (res.length === 1) {
+            responseMessage = showCellStr(res[0]);
+        }
+    } else {
+        responseMessage = 'No email nor email';
+        if (found) {
+            responseMessage = `Found existing user, ${showCellStr(found.cell)}`;
+        }
     }
 
 
@@ -38,6 +48,6 @@ module.exports = async function (context, req) {
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email, nextSunday, sheetInfo},
+        body: { responseMessage, email, nextSunday, sheetInfo,},
     };
 }

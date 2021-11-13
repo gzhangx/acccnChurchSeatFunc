@@ -1,18 +1,49 @@
 const gs = require('./getSheet');
 const credentials = require('./credentials.json');
 const db = {
+    context: null,
+    sheet: null,
     allUsers: [],
     blk: null,
     sheetInfo: {
         sheetInfo: null,
         freeInd: 0,
         lastInfoRefreshTime: 0,
+        dbSheetId: 0,
+        dbSheetNamePrefix:'WEBSTORE_'
     }
+};
+
+const createSheet = async (name) => {
+    const sheet = db.sheet;
+    const sheetInfos = db.sheetInfo.sheetInfo;
+    let freeInd = db.sheetInfo.freeInd;
+    for (let i = 0; i < sheetInfos.length; i++) {
+        const sheet = sheetInfos[i];
+        if (sheet.title === name) return sheet.sheetId;
+    }
+
+    while (true) {
+        if (sheetInfos.find(s => s.sheetId === freeInd)) {
+            freeInd++;
+            continue;
+        }
+        break;
+    }
+    db.context.log(`freeInd for ${name} ${freeInd}`);
+    try {
+        await sheet.createSheet(freeInd, name);
+    } catch (exc) {
+        db.context.log(`Warning failed to create sheet ${exc.message}`);
+    }
+
+    db.sheetInfo.freeInd = freeInd;    
 };
 
 module.exports = {
     db,
-    initSheet: async (context) => {
+    initSheet: async (context, dateStr) => {
+        db.context = context;
         if (!db.sheet) {
             const client = await gs.getClient('gzprem');
             db.sheet = client.getSheetOps(credentials.sheetId);
@@ -25,5 +56,6 @@ module.exports = {
             db.sheetInfo.lastInfoRefreshTime = curMs;
         }
 
+        await createSheet(db.sheetInfo.dbSheetNamePrefix + dateStr);
     },
 }
