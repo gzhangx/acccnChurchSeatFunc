@@ -149,9 +149,8 @@ async function saveDisplaySheet(util) {
             const uiCol = blockStarts[c.accessPos.b] + c.col;
             const uiRow = STARTRow + c.row;
             try {
-                data[uiRow - 1][uiCol - 1] = u;
+                data[uiRow - 1][uiCol - 1] = user;
             } catch (err) {
-                data[uiRow - 1][uiCol - 1] = u;
                 throw err;
             }
         })
