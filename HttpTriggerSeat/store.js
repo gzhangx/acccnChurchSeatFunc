@@ -40,8 +40,21 @@ const createSheet = async (name) => {
     db.sheetInfo.freeInd = freeInd;    
 };
 
+async function saveData() {
+    const allUsers = db.allUsers;
+    if (!allUsers?.length) return;
+    await sheet.updateValues(`'${db.sheetInfo.fullSaveSheetName}'!A1:C${allUsers.length}`,
+        allUsers.map(n => {
+            return [n.email, `${n.blkName}${n.dspRow}-${n.side}${n.dspCol}`
+                , JSON.stringify(n)
+            ];
+        })
+    );
+}
+
 module.exports = {
     db,
+    saveData,
     initSheet: async (context, dateStr) => {
         db.context = context;
         if (!db.sheet) {
@@ -56,6 +69,7 @@ module.exports = {
             db.sheetInfo.lastInfoRefreshTime = curMs;
         }
 
-        await createSheet(db.sheetInfo.dbSheetNamePrefix + dateStr);
+        db.sheetInfo.fullSaveSheetName = db.sheetInfo.dbSheetNamePrefix + dateStr;
+        await createSheet(db.sheetInfo.fullSaveSheetName);
     },
 }

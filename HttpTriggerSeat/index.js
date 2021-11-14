@@ -40,6 +40,7 @@ module.exports = async function (context, req) {
     
             if (res.length === 1) {
                 responseMessage = showCellStr(user.cell);
+                await store.saveData()
             }
         }
     } else {

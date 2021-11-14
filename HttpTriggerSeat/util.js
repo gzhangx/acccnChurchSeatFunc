@@ -237,7 +237,11 @@ function getCellInfo(cell) {
     }
 }
 //user has name, email, count
-function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {    
+function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
+    allUsers.forEach(usr => {
+        const { b, r, c } = usr.accessPos;
+        blks[b][r][c].user = usr;
+    });
     let found = null;
     let badBlkCount = 0;
     for (let rowi = 0; badBlkCount < blks.length; rowi++) {            
