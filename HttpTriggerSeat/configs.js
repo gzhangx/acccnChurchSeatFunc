@@ -60,6 +60,7 @@ function assignRoles() {
         }
     });
     return {
+        pureSitConfig: inited.pureSitConfig,
         blks,
         getRole: rname => {
             if (roleSits[rname] === 'E') {

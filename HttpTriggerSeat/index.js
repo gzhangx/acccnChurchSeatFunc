@@ -22,7 +22,7 @@ module.exports = async function (context, req) {
     const name = getPrm('name');    
     const email = (getPrm('email') || '').toLowerCase().trim();
     const count = parseInt(getPrm('count') || 1);
-    const role = getPrm('role') || 'user';
+    const role = getPrm('role') || util.REGULAR_USER_ROLE;
     const nextSunday = util.getNextSundays()[0];
     
     await store.initSheet(context, nextSunday);

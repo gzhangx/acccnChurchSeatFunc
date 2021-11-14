@@ -61,10 +61,29 @@ async function loadData() {
     }
 }
 
+async function saveDisplaySheet() {
+    const STARTCol = 4;
+    const STARTRow = 3;
+    const namesSpacking = 3;
+
+    const namesStartRow = STARTRow + numRows + namesSpacking;
+    const CELLSIZE = 20;
+
+    const data = [];
+    for (let i = 0; i < STARTRow + numRows; i++) {
+        data[i] = [];
+        for (let j = 0; j < STARTCol + numCols; j++) {
+            data[i][j] = null;
+        }
+    }
+
+}
+
 module.exports = {
     db,
     saveData,
     loadData,
+    saveDisplaySheet,
     initSheet: async (context, dateStr) => {
         db.context = context;
         if (!db.sheet) {

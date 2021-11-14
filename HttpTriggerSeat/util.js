@@ -1,6 +1,6 @@
 const fs = require('fs');
 const gs = require('./getSheet');
-
+const REGULAR_USER_ROLE = 'user';
 const blkMap = Object.freeze(['A', 'B', 'C', 'D']);
 const blkLetterToId = blkMap.reduce((acc, ltr, id) => {
     acc[ltr] = id;
@@ -98,83 +98,7 @@ function parseSits(pack = 2) {
 }
 
 function initParms(pack=2) {
-    const blockSpacing = 2;
-    const fMax = (acc, cr) => acc < cr ? cr : acc;
     const pureSitConfig = parseSits(pack);
-    const blockColMaxes = pureSitConfig.map(r => r.cols);
-    const numCols = blockColMaxes.reduce((acc, r) => acc + r + blockSpacing, 0);
-    //const numRows = blockConfig.map(r => r.length).reduce(fMax, 0);
-    const numRows = pureSitConfig.map(r => r.rows).reduce(fMax, 0);
-
-    const STARTCol = 4;
-    const STARTRow = 3;
-    const namesSpacking = 3;
-
-    const namesStartRow = STARTRow + numRows + namesSpacking;
-    const CELLSIZE = 20;
-    const blockStarts = blockColMaxes.reduce((acc, b) => {
-        const curStart = acc.cur + blockSpacing + acc.prev;
-        acc.prev = b;
-        acc.res.push(curStart);
-        acc.cur = curStart;
-        return acc;
-    }, {
-        res: [],
-        prev: 0,
-        cur: STARTCol - blockSpacing,
-    }).res;    
-
-
-    function getDisplayData(blockSits) {
-        const data = [];
-        const debugCOLLimit = 30;
-        for (let i = 0; i < STARTRow + numRows; i++) {
-            data[i] = [];
-            for (let j = 0; j < STARTCol + numCols; j++) {
-                data[i][j] = null;
-            }
-
-            //debug
-            //data[i] = [];
-            for (let j = 0; j < debugCOLLimit; j++)
-                data[i][j] = null;
-        }
-
-        //top col cord
-        pureSitConfig.forEach((bc, i) => {
-            data[STARTRow - 2][bc.letterCol + blockStarts[i] - 1] = {
-                user: {
-                    id: blkMap[i]
-                }
-            }
-        });
-        for (let i = 0; i < numRows; i++) {
-            data[i + STARTRow - 1][0] = {
-                user: {
-                    id: getDisplayRow(i).toString()
-                }
-            }
-        }
-
-
-        blockSits.forEach(blk => {
-            blk.forEach(r => {
-                r.forEach(c => {
-                    if (!c) return;
-                    //data[c.uiPos.row - STARTRow][c.uiPos.col - STARTCol] = c.user ? c.user.id : 'e';
-                    //if (c.uiPos.col < debugCOLLimit) //debug
-                    try {
-                        data[c.uiPos.row - 1][c.uiPos.col - 1] = c;
-                    } catch (err) {
-                        data[c.uiPos.row - 1][c.uiPos.col - 1] = c;
-                        throw err;
-                    }
-                })
-            })
-        });
-        return data;
-    }
-
 
     ///arry of 4 blks, [a,b,c,d]
     ///each block: array of rows[r,r,r,r....]
@@ -187,26 +111,11 @@ function initParms(pack=2) {
 
                     const blk = {
                         ...r,
-                        blkRow: `${blkMap[bi]}${r.row}`,
-                        blkRowId: `${blkMap[bi]}${r.row}-${r.col}`,
+                        blkName: blkMap[bi],
+                        blkId: bi,
                         dspCol: r.side === 'L' ? r.col - cblk.rowColMin[r.row] + cblk.min + 1 : cblk.rowColMax[r.row] - r.col - cblk.min + 1,
-                        user: null,
-                        uiPos: {
-                            col: blockStarts[bi] + r.col,
-                            row: STARTRow + r.row,                            
-                        }
-                    };
-                    if (preSiteItemsByBlkRowId) {
-                        const users = preSiteItemsByBlkRowId[blk.blkRowId];
-                        if (users) {
-                            users.forEach(user => {
-                                blk.user = user;
-                                user.posInfo.rowInfo = blk;
-                                //user.posInfo.side = `${blk.side}-${user.posInfo.side}`;
-                                user.posInfo.side = blk.side;
-                            });
-                        }
-                    }
+                        user: null,                        
+                    };                    
                     return blk;
                 });
             });
@@ -217,17 +126,16 @@ function initParms(pack=2) {
 
 
     return {
+        pureSitConfig,
         generateBlockSits,
         blkMap,
-        blkLetterToId,
-        STARTCol,
-        STARTRow,        
+        blkLetterToId,      
     }
 }
 
 function getCellInfo(cell) {
     return {
-        blkName: cell.blkRow[0],
+        blkName: cell.blkName,
         col: cell.col,
         row: cell.row,
         dspRow: cell.row + 1,
@@ -266,7 +174,8 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
                 const cell = curRow[ci];                
                 if (!cell) continue;
                 if (user.role !== cell.role) {
-                    if (cell.role || user.role) continue;
+                    const usrRoleHasReq = user.role && user.role !== REGULAR_USER_ROLE;
+                    if (!!cell.role || usrRoleHasReq) continue;
                 }
                 cell.accessPos = { b: blki, r: rowi, c: ci };
                 if (!cell.user) {
@@ -342,6 +251,7 @@ function getNextSundays() {
 }
 
 module.exports = {
+    REGULAR_USER_ROLE,
     initParms,
     parseSits,
     tryAddUser,
