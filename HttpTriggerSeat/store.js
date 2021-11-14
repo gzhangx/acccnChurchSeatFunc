@@ -43,18 +43,28 @@ const createSheet = async (name) => {
 async function saveData() {
     const allUsers = db.allUsers;
     if (!allUsers?.length) return;
-    await sheet.updateValues(`'${db.sheetInfo.fullSaveSheetName}'!A1:C${allUsers.length}`,
+    await db.sheet.updateValues(`'${db.sheetInfo.fullSaveSheetName}'!A1:C${allUsers.length}`,
         allUsers.map(n => {
-            return [n.email, `${n.blkName}${n.dspRow}-${n.side}${n.dspCol}`
+            const cell = n.cell;
+            return [n.email, `${cell.blkName}${cell.dspRow}-${cell.side}${cell.dspCol}`
                 , JSON.stringify(n)
             ];
         })
     );
 }
 
+async function loadData() {
+    if (db.allUsers.length === 0) {
+        const vals = await db.sheet.readValues(`'${db.sheetInfo.fullSaveSheetName}'!A:C`);
+        console.log(vals);
+        db.allUsers = vals.map(v => JSON.parse(v[2]));
+    }
+}
+
 module.exports = {
     db,
     saveData,
+    loadData,
     initSheet: async (context, dateStr) => {
         db.context = context;
         if (!db.sheet) {

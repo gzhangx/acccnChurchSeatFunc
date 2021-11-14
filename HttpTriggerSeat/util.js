@@ -239,8 +239,10 @@ function getCellInfo(cell) {
 //user has name, email, count
 function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
     allUsers.forEach(usr => {
-        const { b, r, c } = usr.accessPos;
-        blks[b][r][c].user = usr;
+        usr.cells.map(cell => {
+            const { b, r, c } = cell.accessPos;
+            blks[b][r][c].user = usr;
+        });        
     });
     let found = null;
     let badBlkCount = 0;

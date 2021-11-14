@@ -1,18 +1,32 @@
 const util = require('./util');
 const store = require('./store');
 const blkConfigs = require('./configs');
+const { db } = require('./store');
 
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
     const getPrm = name => req.query[name] || (req.body && req.body[name]);
-    const name = getPrm('name');
+    const actionStr = getPrm('action');
+    if (actionStr === 'reset') {
+        store.db.allUsers = [];
+        context.res = {            
+            headers: {
+                'content-type': 'application/json; charset=utf-8'
+            },
+            body: 'reseted',
+        };
+        return;
+    }
+
+    const name = getPrm('name');    
     const email = (getPrm('email') || '').toLowerCase().trim();
     const count = parseInt(getPrm('count') || 1);
     const role = getPrm('role') || 'user';
     const nextSunday = util.getNextSundays()[0];
     
     await store.initSheet(context, nextSunday);
+    await store.loadData();
     const sheetInfo = store.db.sheetInfo.sheetInfo;
     const rolesBlks = blkConfigs.assignRoles();
     const blks = store.db.blks || rolesBlks.blks;
