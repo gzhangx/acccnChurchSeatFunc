@@ -256,5 +256,6 @@ module.exports = {
     parseSits,
     tryAddUser,
     getNextSundays,
+    blkMap,
     blkLetterToId,
 }

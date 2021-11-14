@@ -31,6 +31,7 @@ module.exports = async function (context, req) {
     const rolesBlks = blkConfigs.assignRoles();
     const blks = store.db.blks || rolesBlks.blks;
     store.db.blks = blks;
+    store.db.pureSitConfig = rolesBlks.pureSitConfig;
     const roleObj = rolesBlks.getRole(role);
     
     let responseMessage = `Cant find a seat sorry ${name}`;
@@ -54,7 +55,8 @@ module.exports = async function (context, req) {
     
             if (res.length === 1) {
                 responseMessage = showCellStr(user.cell);
-                await store.saveData()
+                await store.saveData();
+                await store.saveDisplaySheet(util);
             }
         }
     } else {

@@ -48,7 +48,7 @@ function assignRoles() {
             noSeat: false,
         }
     });
-    console.log(parsedRoles);
+
     parsedRoles.forEach(pw => {
         const { blkId, role, rows, noSeat } = pw;
         if (noSeat) return;
@@ -60,7 +60,18 @@ function assignRoles() {
         }
     });
     return {
-        pureSitConfig: inited.pureSitConfig,
+        pureSitConfig: inited.pureSitConfig.map(r => {
+            return {
+                letterCol: r.letterCol,
+                min: r.min,
+                max: r.max,
+                maxRow: r.maxRow,
+                minRow: r.minRow,
+                cols: r.cols,
+                rows: r.rows,
+                //rowColMax, rowColMin
+            }
+        }),
         blks,
         getRole: rname => {
             if (roleSits[rname] === 'E') {
