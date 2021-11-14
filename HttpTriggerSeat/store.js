@@ -63,6 +63,10 @@ async function loadData() {
 }
 
 async function saveDisplaySheet(util) {
+    const sheet = db.sheet;
+    const allSheetInfo = db.sheetInfo.sheetInfo;
+    const sheetInfo = allSheetInfo.find(s => s.title === 'Display');
+    const sheetId = sheetInfo.sheetId;
     let colors = [[0, 0, 255], [0, 255, 0], [255, 0, 0], [0, 255, 255], [255, 0, 255], [255, 200, 200]];
     let fontColor = ['#ffff00', '#ff00ff', '#00ffff', '#000000', '#000000', '#000000'];
     let rgbFontColor = [[255, 255, 0], [255, 0, 255], [0, 255, 255], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -157,6 +161,7 @@ async function saveDisplaySheet(util) {
 
     });
     
+    const endColumnIndex = STARTCol + numCols;
     const rowData = data.map(r => {
         return {
             values: r.map((cval) => {
@@ -209,6 +214,112 @@ async function saveDisplaySheet(util) {
             })
         };
     });
+
+
+    const endRowIndex = data.length + 1 + db.allUsers.length;
+    const updateData = {
+        requests: [
+            {
+                updateCells: {
+                    fields: '*',
+                    range: {
+                        sheetId,
+                        startColumnIndex: 0,
+                        endColumnIndex,
+                        startRowIndex: 0,
+                        endRowIndex
+                    },
+                    rows: [...rowData,]
+                }
+            }
+        ]
+    };
+
+    if (endRowIndex > sheetInfo.rowCount || endColumnIndex > sheetInfo.columnCount) {
+        const requests = [];
+        if (endColumnIndex > sheetInfo.columnCount) {
+            requests.push({
+                appendDimension: {
+                    sheetId,
+                    dimension: 'COLUMNS',
+                    length: endColumnIndex - sheetInfo.columnCount,
+                }
+            })
+        }
+        if (endRowIndex > sheetInfo.rowCount) {
+            requests.push({
+                appendDimension: {
+                    sheetId,
+                    dimension: 'ROWS',
+                    length: endRowIndex - sheetInfo.rowCount,
+                }
+            })
+        }
+        if (requests.length) {
+            //console.log(`updating column endColumnIndex=${endColumnIndex} sheetInfo.columnCount=${sheetInfo.columnCount} ${endColumnIndex > sheetInfo.columnCount}` );
+            //console.log({
+            //  sheetId,
+            //  dimension: 'COLUMNS',
+            //  length: endColumnIndex - sheetInfo.columnCount,
+            //})
+            await sheet.doBatchUpdate({ requests });
+            //console.log('column updated');
+        }
+    }
+    await sheet.doBatchUpdate({
+        requests: [
+            {
+                updateDimensionProperties: {
+                    range: {
+                        sheetId,
+                        dimension: 'COLUMNS',
+                        startIndex: 0,
+                        endIndex: endColumnIndex
+                    },
+                    properties: {
+                        pixelSize: CELLSIZE
+                    },
+                    fields: 'pixelSize'
+                }
+            },
+            {
+                updateDimensionProperties: {
+                    range: {
+                        sheetId,
+                        dimension: 'ROWS',
+                        startIndex: 0,
+                        endIndex: endRowIndex
+                    },
+                    properties: {
+                        pixelSize: CELLSIZE
+                    },
+                    fields: 'pixelSize'
+                }
+            }
+        ]
+    })
+
+
+    //fs.writeFileSync('test.json', JSON.stringify(updateData, null, 2))
+    //fs.writeFileSync('debugblockSits.json', JSON.stringify(blockSits,null,2))
+    //endRowIndex > sheetInfo.rowCount ? endRowIndex : sheetInfo.rowCount,
+    if (sheetInfo.rowCount > endRowIndex) {
+        await sheet.doBatchUpdate({
+            requests: [
+                {
+                    deleteDimension: {
+                        range: {
+                            sheetId,
+                            dimension: 'ROWS',
+                            startIndex: endRowIndex,
+                            endIndex: sheetInfo.rowCount
+                        }
+                    }
+                },
+            ],
+        });
+    }
+    await sheet.doBatchUpdate(updateData);
 }
 
 module.exports = {
