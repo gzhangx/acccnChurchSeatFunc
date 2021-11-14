@@ -165,7 +165,7 @@ async function saveDisplaySheet(util) {
     });
     
     const endColumnIndex = STARTCol + numCols;
-    const rowData = data.map(r => {
+    const rowDataNoUser = data.map(r => {
         return {
             values: r.map((cval) => {
                 const user = cval && cval.user;
@@ -222,7 +222,10 @@ async function saveDisplaySheet(util) {
     });
 
 
-    const endRowIndex = data.length + 1 + db.allUsers.length;
+    const rawData = rowDataNoUser.concat(allUsers.map((u, i)=>{
+        return []
+    }));
+    const endRowIndex = rawData.length + 1;
     const updateData = {
         requests: [
             {
