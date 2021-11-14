@@ -4,7 +4,7 @@ const db = {
     context: null,
     sheet: null,
     allUsers: [],
-    blk: null,
+    blks: null,
     pureSitConfig: null,
     sheetInfo: {
         sheetInfo: null,
@@ -133,32 +133,35 @@ async function saveDisplaySheet(util) {
 
     //top col cord
     pureSitConfig.forEach((bc, i) => {
-        data[STARTRow - 2][bc.letterCol + blockStarts[i] - 1] = {
-            user: {
-                id: blkMap[i]
-            }
-        }
+        data[STARTRow - 2][bc.letterCol + blockStarts[i] - 1] = blkMap[i];
     });
     for (let i = 0; i < numRows; i++) {
-        data[i + STARTRow - 1][0] = {
-            user: {
-                id: (i+1).toString()
-            }
-        }
+        data[i + STARTRow - 1][0] = (i + 1).toString();
     }
 
 
-    db.allUsers.forEach(user=> {
+    db.blks.forEach(blk => {
+        blk.forEach(rows => {
+            if (!rows) return;
+            rows.forEach(cell => {
+                if (!cell) return;
+                const uiCol = blockStarts[cell.blkId] + cell.col;
+                const uiRow = STARTRow + cell.row;
+                data[uiRow - 1][uiCol - 1] = {};
+            });
+        });
+    });
+    db.allUsers.forEach((user, userInd)=> {
         user.cells.forEach(c => {
             const uiCol = blockStarts[c.accessPos.b] + c.col;
             const uiRow = STARTRow + c.row;
             try {
-                data[uiRow - 1][uiCol - 1] = user;
+                user.userInd = userInd;
+                data[uiRow - 1][uiCol - 1] = { user };
             } catch (err) {
                 throw err;
             }
         })
-
     });
     
     const endColumnIndex = STARTCol + numCols;
@@ -166,17 +169,17 @@ async function saveDisplaySheet(util) {
         return {
             values: r.map((cval) => {
                 const user = cval && cval.user;
-                const stringValue = (cval ? (user?.id || '-') : '').toString();
+                const stringValue = (cval ? (user?.userInd || '-') : '').toString();
                 const horizontalAlignment = 'CENTER';
                 const cell = {
                     userEnteredValue: { stringValue }
                 };
-                if (user && user.id) {
+                if (user && user.userInd) {
                     cell.userEnteredFormat = {
-                        backgroundColor: rgbColors[user.pos],
+                        backgroundColor: rgbColors[user.userInd],
                         horizontalAlignment,
                         textFormat: {
-                            foregroundColor: rgbFontColor[user.pos],
+                            foregroundColor: rgbFontColor[user.userInd],
                             //fontFamily: string,
                             //"fontSize": integer,
                             bold: true,
@@ -197,7 +200,7 @@ async function saveDisplaySheet(util) {
                         }
                     };
                 } else {
-                    cell.userEnteredFormat = {
+                    cell.userEnteredFormat = {                        
                         horizontalAlignment,
                         backgroundColor: cval ? {
                             blue: 0,
@@ -208,6 +211,9 @@ async function saveDisplaySheet(util) {
                             green: 1,
                             red: 1
                         },
+                    }
+                    if (cval && typeof cval === 'string') {
+                        cell.userEnteredValue = { stringValue: cval };
                     }
                 }
                 return cell;
