@@ -29,7 +29,7 @@ function assignRoles() {
             }
         }
     };
-    const parsedRows = Object.keys(roleSits).map(role => {
+    const parsedRoles = Object.keys(roleSits).map(role => {
         const pos = roleSits[role];
         const id = util.blkLetterToId[pos[0]]
         const rows = pos.substr(1);
@@ -48,18 +48,29 @@ function assignRoles() {
             noSeat: false,
         }
     });
-    console.log(parsedRows);
-    parsedRows.forEach(pw => {
+    console.log(parsedRoles);
+    parsedRoles.forEach(pw => {
         const { blkId, role, rows, noSeat } = pw;
         if (noSeat) return;
         const blk = blks[blkId];
-        for (let i = rows.start; i < rows.end; i++) {
+        for (let i = rows.start; i <= rows.end; i++) {
             blk[i].filter(x=>x).forEach(c => {                
                 c.role = role;
             });
         }
     });
-    return blks;
+    return {
+        blks,
+        getRole: rname => {
+            if (roleSits[rname] === 'E') {
+                return {
+                    role: 'regular',
+                    noSeat: true,
+                }
+            }
+            return parsedRoles.find(r => r.role === rname) || { role: null };
+        }
+    };
 }
 
 module.exports = {

@@ -14,27 +14,33 @@ module.exports = async function (context, req) {
     
     await store.initSheet(context, nextSunday);
     const sheetInfo = store.db.sheetInfo.sheetInfo;
-    const blks = store.db.blks || blkConfigs.assignRoles();
+    const rolesBlks = blkConfigs.assignRoles();
+    const blks = store.db.blks || rolesBlks.blks;
     store.db.blks = blks;
-
+    const roleObj = rolesBlks.getRole(role);
+    
     let responseMessage = `Cant find a seat sorry ${name}`;
 
     const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
-    const found = store.db.allUsers.find(u => u.email === email);
+    const found = store.db.allUsers.find(u => u.email === email);    
     if (name && email && !found) {
         const user = {
-            name, email, count
-        };        
-
-        const res = util.tryAddUser({
-            user,
-            blks,
-            allUsers: store.db.allUsers,
-        });
+            name, email, count, role,
+        };
+        if (roleObj.noSeat) {
+            store.db.allUsers.push(user);
+            responseMessage = `No need to assign a seat`;
+        } else {
+            const res = util.tryAddUser({
+                user,
+                blks,
+                allUsers: store.db.allUsers,
+            });
 
     
-        if (res.length === 1) {
-            responseMessage = showCellStr(user.cell);
+            if (res.length === 1) {
+                responseMessage = showCellStr(user.cell);
+            }
         }
     } else {
         responseMessage = 'No email nor email';

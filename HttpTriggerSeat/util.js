@@ -259,6 +259,7 @@ function tryAddUser({ blks, user, allUsers, fixedToBlk, spacing=2 }) {
             for (let ci = 0; ci < curRow.length; ci++) {
                 const cell = curRow[ci];                
                 if (!cell) continue;
+                if (cell.role && cell.role !== user.role) continue;
                 cell.accessPos = { b: blki, r: rowi, c: ci };
                 if (!cell.user) {
                     if (possibleCount < user.count) {
