@@ -15,16 +15,16 @@ async function test() {
     store.db.pureSitConfig = rolesBlks.pureSitConfig;
 
     const name = 'test111';
+    const email = 'tst@testemail.com';
     const user = {
-        name, email, count, role,
+        name, email, count:1, role:'test',
     };
         
     const res = util.tryAddUser({
         user,
         blks,
         allUsers: store.db.allUsers,
-    });
-    console.log(res);
+    });    
     await store.saveDisplaySheet(util);
 }
 

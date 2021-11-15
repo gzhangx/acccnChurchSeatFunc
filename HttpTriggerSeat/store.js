@@ -57,7 +57,6 @@ async function saveData() {
 async function loadData() {
     if (db.allUsers.length === 0) {
         const vals = await db.sheet.readValues(`'${db.sheetInfo.fullSaveSheetName}'!A:C`);
-        console.log(vals);
         db.allUsers = vals.map(v => JSON.parse(v[2]));
     }
 }
@@ -65,6 +64,7 @@ async function loadData() {
 async function saveDisplaySheet(util) {
     const sheet = db.sheet;
     const allSheetInfo = db.sheetInfo.sheetInfo;
+    const allUsers = db.allUsers;
     const sheetInfo = allSheetInfo.find(s => s.title === 'Display');
     const sheetId = sheetInfo.sheetId;
     let colors = [[0, 0, 255], [0, 255, 0], [255, 0, 0], [0, 255, 255], [255, 0, 255], [255, 200, 200]];
@@ -222,8 +222,14 @@ async function saveDisplaySheet(util) {
     });
 
 
-    const rawData = rowDataNoUser.concat(allUsers.map((u, i)=>{
-        return []
+    const rawData = rowDataNoUser.concat(allUsers.map((u, i) => {
+        const cell = u.cell;
+        const stringValue = `${u.name} - ${cell.blkName}${cell.dspRow}-${cell.col} (${cell.side}${cell.dspCol})`;
+        return {
+            values: [{
+                userEnteredValue: { stringValue }
+            }]
+        }
     }));
     const endRowIndex = rawData.length + 1;
     const updateData = {
@@ -238,7 +244,7 @@ async function saveDisplaySheet(util) {
                         startRowIndex: 0,
                         endRowIndex
                     },
-                    rows: [...rowData,]
+                    rows: [...rawData,]
                 }
             }
         ]
