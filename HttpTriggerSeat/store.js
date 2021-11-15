@@ -177,6 +177,7 @@ async function saveDisplaySheet(util) {
                     userEnteredValue: { stringValue }
                 };
                 if (user && user.userInd) {
+                    //console.log(`user=${user.userInd} bg=${JSON.stringify(rgbColors[user.userInd])}`)
                     cell.userEnteredFormat = {
                         backgroundColor: rgbColors[user.userInd],
                         horizontalAlignment,

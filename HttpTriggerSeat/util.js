@@ -168,7 +168,6 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
                 continue;
             }
             let leftFromPossibleCandidate = spacing;
-            let leftTotal = spacing;
             let right = 0;
             for (let ci = 0; ci < curRow.length; ci++) {
                 const cell = curRow[ci];                
@@ -187,11 +186,9 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
                         } else {
                             leftFromPossibleCandidate++;
                         }
-                        leftTotal++;
                     } else {
                         right++;
                         leftFromPossibleCandidate++;
-                        leftTotal++;
                         if (right >= spacing && possible) {
                             spots.push(possible);
                             possibleCount = 0;
@@ -204,7 +201,6 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
                     possible = [];
                     right = 0;
                     leftFromPossibleCandidate = 0;
-                    leftTotal = 0;
                 }
                 if (spots.length > 1) break;
             }
