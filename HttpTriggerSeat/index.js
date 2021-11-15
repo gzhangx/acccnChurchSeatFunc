@@ -1,7 +1,6 @@
 const util = require('./util');
 const store = require('./store');
 const blkConfigs = require('./configs');
-const { db } = require('./store');
 
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
