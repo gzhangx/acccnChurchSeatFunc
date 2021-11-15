@@ -153,12 +153,13 @@ async function saveDisplaySheet(util) {
             });
         });
     });
+
     db.allUsers.forEach((user, userInd)=> {
         user.cells.forEach(c => {
             const uiCol = blockStarts[c.accessPos.b] + c.col;
             const uiRow = STARTRow + c.row;
             try {
-                user.userInd = userInd;
+                user.userInd = userInd + 1;
                 data[uiRow - 1][uiCol - 1] = { user };
             } catch (err) {
                 throw err;
@@ -217,6 +218,13 @@ async function saveDisplaySheet(util) {
                     }
                     if (cval && typeof cval === 'string') {
                         cell.userEnteredValue = { stringValue: cval };
+                        cell.userEnteredFormat = {
+                            backgroundColor: {
+                                blue: 1,
+                                green: 1,
+                                red: 1
+                            }
+                        };
                     }
                 }
                 return cell;
@@ -227,11 +235,20 @@ async function saveDisplaySheet(util) {
 
     const rawData = rowDataNoUser.concat(allUsers.map((u, i) => {
         const cell = u.cell;
-        const stringValue = `${u.name} - ${cell.blkName}${cell.dspRow}-${cell.col} (${cell.side}${cell.dspCol})`;
+        const stringValue = `${cell.blkName}${cell.dspRow}-${cell.col} (${cell.side}${cell.dspCol})`;
         return {
-            values: [{
+            values: [
+                {
+                    userEnteredValue: { stringValue: u.userInd.toString() }
+                },
+                {
                 userEnteredValue: { stringValue }
-            }]
+                },
+                {}, {}, {}, {},
+                {
+                    userEnteredValue: { stringValue: u.name }
+                },
+            ]
         }
     }));
     const endRowIndex = rawData.length + 1;
