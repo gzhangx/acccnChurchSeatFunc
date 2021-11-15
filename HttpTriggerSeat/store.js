@@ -14,7 +14,8 @@ const db = {
         lastInfoRefreshTime: 0,
         dbSheetId: 0,
         dbSheetNamePrefix:'WEBSTORE_'
-    }
+    },
+    needBuildDisplay = false,
 };
 
 const createSheet = async (name) => {
