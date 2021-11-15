@@ -1,5 +1,7 @@
 const gs = require('./getSheet');
 const credentials = require('./credentials.json');
+const blkConfigs = require('./configs');
+
 const db = {
     context: null,
     sheet: null,
@@ -337,11 +339,20 @@ async function saveDisplaySheet(util) {
     await sheet.doBatchUpdate(updateData);
 }
 
+function getBlkAndRole(role) {
+    const rolesBlks = blkConfigs.assignRoles();
+    const blks = db.blks || rolesBlks.blks;
+    db.blks = blks;
+    db.pureSitConfig = rolesBlks.pureSitConfig;
+    const roleObj = rolesBlks.getRole(role);
+    return {blks, roleObj}
+}
 module.exports = {
     db,
     saveData,
     loadData,
     saveDisplaySheet,
+    getBlkAndRole,
     initSheet: async (context, dateStr) => {
         db.context = context;
         if (!db.sheet) {

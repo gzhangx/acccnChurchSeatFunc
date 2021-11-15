@@ -1,6 +1,6 @@
 const util = require('./util');
 const store = require('./store');
-const blkConfigs = require('./configs');
+
 
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
@@ -26,12 +26,8 @@ module.exports = async function (context, req) {
     
     await store.initSheet(context, nextSunday);
     await store.loadData();
-    const sheetInfo = store.db.sheetInfo.sheetInfo;
-    const rolesBlks = blkConfigs.assignRoles();
-    const blks = store.db.blks || rolesBlks.blks;
-    store.db.blks = blks;
-    store.db.pureSitConfig = rolesBlks.pureSitConfig;
-    const roleObj = rolesBlks.getRole(role);
+
+    const { blks, roleObj } = store.getBlkAndRole(role);
     
     let responseMessage = `Cant find a seat sorry ${name}`;
 
@@ -71,6 +67,6 @@ module.exports = async function (context, req) {
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email, nextSunday, sheetInfo,},
+        body: { responseMessage, email, nextSunday,},
     };
 }
