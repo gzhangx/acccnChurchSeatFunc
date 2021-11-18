@@ -51,7 +51,14 @@ module.exports = async function (context, req) {
     let responseMessage = `Cant find a seat sorry ${name}`;
 
     const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
-    const found = store.db.allUsers.find(u => u.email === email);    
+    const found = store.db.allUsers.find(u => u.email === email);
+    const getMultiUserMsg = user => {
+        const cell = user.cell;
+        const all = user.cells.map(c => {
+            return `${c.side}${c.dspCol}`;
+        }).join(',');
+        return `Dear ${name}, your seats are at ${cell.blkName}${cell.dspRow} seats ${all}`;
+    }
     if (name && email && !found) {
         const user = {
             name, email, count, role,
@@ -67,8 +74,12 @@ module.exports = async function (context, req) {
             });
 
     
-            if (res && res.length === 1) {
-                responseMessage = showCellStr(user.cell);
+            if (res && res.length > 0) {
+                if (res.length === 1) {
+                    responseMessage = showCellStr(user.cell);
+                } else {                
+                    responseMessage = getMultiUserMsg(user);
+                }
                 await store.saveData();
                 store.db.needBuildDisplay = true;
                 new Promise(async () => {
@@ -84,7 +95,11 @@ module.exports = async function (context, req) {
     } else {
         responseMessage = 'No email nor email';
         if (found) {
-            responseMessage = `Found existing user, ${showCellStr(found.cell)}`;
+            if (found.count === 1) {
+                responseMessage = `Found existing user, ${showCellStr(found.cell)}`;
+            } else {
+                responseMessage = getMultiUserMsg(found);
+            }
         }
     }
 
