@@ -1,11 +1,24 @@
 const util = require('./util');
 const store = require('./store');
 
-
+function parseRowBody(rawStr) {    
+    if (rawStr && typeof rawStr === 'string') {
+        const parts = rawStr.split('&');
+        return parts.reduce((acc, prt) => {
+            const nameVal = prt.split('=');
+            let val = nameVal[1];
+            if (val !== undefined || val !== null) val = decodeURIComponent(val);
+            acc[decodeURIComponent(nameVal[0])] = val;
+            return acc;
+        }, {});
+    }
+    return {};
+}
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    const getPrm = name => req.query[name] || (req.body && req.body[name]);
+    const rawBody = parseRowBody(req.rawBody);
+    const getPrm = name => req.query[name] || (req.body && req.body[name]) || rawBody[name];
     const actionStr = getPrm('action');
     if (actionStr === 'reset') {
         store.db.allUsers = [];
@@ -17,7 +30,7 @@ module.exports = async function (context, req) {
         };
         return;
     }
-
+    
     const name = getPrm('name');    
     const email = (getPrm('email') || '').toLowerCase().trim();
     const count = parseInt(getPrm('count') || 1);
