@@ -1,5 +1,6 @@
 const util = require('./util');
 const store = require('./store');
+const actions = require('./actions');
 
 function parseRowBody(rawStr) {    
     if (rawStr && typeof rawStr === 'string') {
@@ -20,15 +21,9 @@ module.exports = async function (context, req) {
     const rawBody = parseRowBody(req.rawBody);
     const getPrm = name => req.query[name] || (req.body && req.body[name]) || rawBody[name];
     const actionStr = getPrm('action');
-    if (actionStr === 'reset') {
-        store.db.allUsers = [];
-        context.res = {            
-            headers: {
-                'content-type': 'application/json; charset=utf-8'
-            },
-            body: 'reseted',
-        };
-        return;
+    if (actionStr && actions[actionStr]) {
+        await store.initSheet(context);
+        return await actions[actionStr](context, getPrm);
     }
     
     const name = getPrm('name');    

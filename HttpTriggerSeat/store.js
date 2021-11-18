@@ -6,6 +6,7 @@ const db = {
     context: null,
     sheet: null,
     allUsers: [],
+    allUserQRs: [],
     blks: null,
     pureSitConfig: null,
     sheetInfo: {
@@ -378,15 +379,18 @@ module.exports = {
             const client = await gs.getClient('gzprem');
             db.sheet = client.getSheetOps(credentials.sheetId);
         }
-        const now = new Date();
-        const curMs = now.getTime();
-        if (!db.sheetInfo.sheetInfo || curMs - db.sheetInfo.lastInfoRefreshTime > 10 * 1000) {
-            context.log(`Refreshing sheetInfo ${curMs}`);
-            db.sheetInfo.sheetInfo = await db.sheet.sheetInfo();
-            db.sheetInfo.lastInfoRefreshTime = curMs;
-        }
 
-        db.sheetInfo.fullSaveSheetName = db.sheetInfo.dbSheetNamePrefix + dateStr;
-        await createSheet(db.sheetInfo.fullSaveSheetName);
+        if (dateStr) {
+            const now = new Date();
+            const curMs = now.getTime();
+            if (!db.sheetInfo.sheetInfo || curMs - db.sheetInfo.lastInfoRefreshTime > 10 * 1000) {
+                context.log(`Refreshing sheetInfo ${curMs}`);
+                db.sheetInfo.sheetInfo = await db.sheet.sheetInfo();
+                db.sheetInfo.lastInfoRefreshTime = curMs;
+            }
+
+            db.sheetInfo.fullSaveSheetName = db.sheetInfo.dbSheetNamePrefix + dateStr;
+            await createSheet(db.sheetInfo.fullSaveSheetName);
+        }
     },
 }
