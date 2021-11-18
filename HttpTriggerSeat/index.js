@@ -67,7 +67,7 @@ module.exports = async function (context, req) {
             });
 
     
-            if (res.length === 1) {
+            if (res && res.length === 1) {
                 responseMessage = showCellStr(user.cell);
                 await store.saveData();
                 store.db.needBuildDisplay = true;
@@ -77,6 +77,8 @@ module.exports = async function (context, req) {
                         store.db.needBuildDisplay = false;
                     }
                 });                
+            } else {
+                responseMessage = `Unable to sit ${name} role=${role}`;
             }
         }
     } else {
