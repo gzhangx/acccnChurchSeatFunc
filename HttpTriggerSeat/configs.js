@@ -80,7 +80,7 @@ function assignRoles() {
                     noSeat: true,
                 }
             }
-            return parsedRoles.find(r => r.role === rname) || { role: null };
+            return parsedRoles.find(r => r.role === rname) || { role: {} };
         }
     };
 }
