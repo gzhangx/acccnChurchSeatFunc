@@ -34,13 +34,19 @@ module.exports = async function (context, req) {
     const name = getPrm('name');    
     const email = (getPrm('email') || '').toLowerCase().trim();
     const count = parseInt(getPrm('count') || 1);
-    const role = getPrm('role') || util.REGULAR_USER_ROLE;
+    let role = getPrm('role') || util.REGULAR_USER_ROLE;
     const nextSunday = util.getNextSundays()[0];
     
     await store.initSheet(context, nextSunday);
     await store.loadData();
 
     const { blks, roleObj } = store.getBlkAndRole(role);
+    const unknownRole = !roleObj.role;
+    if (unknownRole) {
+        role = util.REGULAR_USER_ROLE
+    } else {
+        role = roleObj.role;
+    }
     
     let responseMessage = `Cant find a seat sorry ${name}`;
 
