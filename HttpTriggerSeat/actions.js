@@ -82,8 +82,9 @@ async function actionAddUser(context, getPrm) {
 
     email = email.toLowerCase();
 
-    if (store.db.allUserQRs.find(q => q.email === email)) {
-        return returnErr(`Email exists ${email}`);
+    const existing = store.db.allUserQRs.find(q => q.email === email);
+    if (existing) {
+        return returnData(existing);
     }
 
     const body = {
@@ -95,12 +96,7 @@ async function actionAddUser(context, getPrm) {
 
     await saveAll();
     
-    context.res = {
-        headers: {
-            'content-type': 'application/json; charset=utf-8'
-        },
-        body
-    };
+    return returnData(body);
 }
 
 async function actionReset(context) {
