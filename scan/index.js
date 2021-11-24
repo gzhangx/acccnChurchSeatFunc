@@ -64,7 +64,7 @@ module.exports = async function (context, req) {
             '<div style="width: 100%;height:100%;display: flex;flex-direction:column;align-items: center;justify-content: center">' +
             '<h1>ACCCN Check In</h1>' +
             '<div>' +
-            '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/scan">' +
+            '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/httptriggerseat?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D">' +
             //'<form method="POST" action="http://localhost:7071/api/scan">' +
             '<input type="hidden" name="postMark" value="true">' +
             '<div style="padding: 5px;display: flex;flex-direction:column;align-items: stretch;justify-content: center">' +
