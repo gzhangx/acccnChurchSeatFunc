@@ -47,7 +47,7 @@ module.exports = async function (context, req) {
     const postData = parseRowBody(req.body)
     if (postData.postMark) {
         const seatRes = await request.post('https://acccnseatengine.azurewebsites.net/api/HttpTriggerSeat').send(postData).then(r => r.body);
-        res.body = seatRes.responseMessage;
+        res.body = `<h1>${seatRes.responseMessage}</h1>`;
         context.res = res;
         return;
     }
@@ -65,7 +65,7 @@ module.exports = async function (context, req) {
             '<h1>ACCCN Check In</h1>' +
             '<div>' +
             '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/scan">' +
-            // this is for test '<form method="POST" action="http://localhost:7071/api/scan">' +
+            //'<form method="POST" action="http://localhost:7071/api/scan">' +
             '<input type="hidden" name="postMark" value="true">' +
             '<div style="padding: 5px;display: flex;flex-direction:column;align-items: stretch;justify-content: center">' +
             '<div class="form-line">' +
