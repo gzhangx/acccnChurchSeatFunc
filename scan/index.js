@@ -3,17 +3,14 @@ module.exports = async function (context, req) {
     const CryptoJS = require("crypto-js");
 
     function parseQuery(queryString) {
-        var query = {};
-        var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-        for (var i = 0; i < pairs.length; i++) {
-            var pair = pairs[i].split('=');
+        const query = {};
+        const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+        for (const i = 0; i < pairs.length; i++) {
+            const pair = pairs[i].split('=');
             query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
         }
         return query;
     }
-
-
-    context.log('JavaScript HTTP trigger function processed a request.');
 
     const param = req.query.param;
 
@@ -22,21 +19,12 @@ module.exports = async function (context, req) {
         body: ''
     };
 
-    let name, email;
-    if (param) {
-        const queryString = CryptoJS.enc.Base64.parse(param);
-        var rawQueryString = queryString.toString(CryptoJS.enc.Utf8)
-        const queryObject = parseQuery(rawQueryString);
-        name = queryObject['name'];
-        email = queryObject['email'];
-    }
-
     const parseRowBody = rawStr => {
         if (rawStr && typeof rawStr === 'string') {
             const parts = rawStr.split('&');
             return parts.reduce((acc, prt) => {
                 const nameVal = prt.split('=');
-                let val = nameVal[1];
+                const val = nameVal[1];
                 if (val !== undefined || val !== null) val = decodeURIComponent(val);
                 acc[decodeURIComponent(nameVal[0])] = val;
                 return acc;
@@ -44,14 +32,34 @@ module.exports = async function (context, req) {
         }
         return {};
     }
-    const postData = parseRowBody(req.body)
-    if (postData.postMark) {
-        const seatRes = await request.post('https://acccnseatengine.azurewebsites.net/api/httptriggerseat?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
+
+    if (req.method.toLowerCase() === 'post') {
+        const postData = parseRowBody(req.body);
+        const seatRes = await request.post('https://acccnseatengine.azurewebsites.net/api/checkin?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
         res.body = `<h1>${seatRes.responseMessage}</h1>`;
         context.res = res;
         return;
+    } else { 
+        console.log(req.headers.cookie);
+        // check cookie:  AcccnCheckinAuth=7706679593
+        if(!(req.headers.cookie && req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') >= 0)) {
+            res.body = `Bad request: unauthorized`;
+            context.res = res;
+            return;    
+        }
     }
+
+    let name, email;
+    if (param) {
+        const queryString = CryptoJS.enc.Base64.parse(param);
+        const rawQueryString = queryString.toString(CryptoJS.enc.Utf8)
+        const queryObject = parseQuery(rawQueryString);
+        name = queryObject['name'];
+        email = queryObject['email'];
+    }
+
     if (name && email) {
+        const azureEnv = process.env.AZURE_FUNCTIONS_ENVIRONMENT;
         res.body = '<html>' +
             '<header>' +
             '<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>' +
@@ -64,9 +72,9 @@ module.exports = async function (context, req) {
             '<div style="width: 100%;height:100%;display: flex;flex-direction:column;align-items: center;justify-content: center">' +
             '<h1>ACCCN Check In</h1>' +
             '<div>' +
-            '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/scan">' +
-            //'<form method="POST" action="http://localhost:7071/api/scan">' +
-            '<input type="hidden" name="postMark" value="true">' +
+            (azureEnv === 'Development' ? 
+                '<form method="POST" action="http://localhost:7071/api/scan">' :
+                '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/scan">') +
             '<div style="padding: 5px;display: flex;flex-direction:column;align-items: stretch;justify-content: center">' +
             '<div class="form-line">' +
             '<label style="flex-basis: 100px;text-align:right" for="name">Name: </label>' +
@@ -114,7 +122,7 @@ module.exports = async function (context, req) {
             '</body>' +
             '</html>';
     } else {
-        res.body = 'Bad request'
+        res.body = 'Bad request: invalid params'
     }
 
     context.res = res;
