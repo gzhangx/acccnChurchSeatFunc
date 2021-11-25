@@ -35,7 +35,7 @@ module.exports = async function (context, req) {
 
     if (req.method.toLowerCase() === 'post') {
         const postData = parseRowBody(req.body);
-        const seatRes = await request.post('https://acccnseatengine.azurewebsites.net/api/checkin?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
+        const seatRes = await request.post('https://acccncheckin.azurewebsites.net/api/checkin?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
         res.body = `<h1>${seatRes.responseMessage}</h1>`;
         context.res = res;
         return;
@@ -74,7 +74,7 @@ module.exports = async function (context, req) {
             '<div>' +
             (azureEnv === 'Development' ? 
                 '<form method="POST" action="http://localhost:7071/api/scan">' :
-                '<form method="POST" action="https://acccnseatengine.azurewebsites.net/api/scan">') +
+                '<form method="POST" action="https://acccncheckin.azurewebsites.net/api/scan">') +
             '<div style="padding: 5px;display: flex;flex-direction:column;align-items: stretch;justify-content: center">' +
             '<div class="form-line">' +
             '<label style="flex-basis: 100px;text-align:right" for="name">Name: </label>' +
