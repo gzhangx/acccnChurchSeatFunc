@@ -1,48 +1,22 @@
+const utils = require('./utils');
 const request = require('superagent');
 module.exports = async function (context, req) {
     const CryptoJS = require("crypto-js");
-
-    function parseQuery(queryString) {
-        const query = {};
-        const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-        for (const i = 0; i < pairs.length; i++) {
-            const pair = pairs[i].split('=');
-            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
-        }
-        return query;
-    }
-
-    const param = req.query.param;
-
     const res = {
         headers: { "Content-Type": "text/html" },
         body: ''
     };
 
-    const parseRowBody = rawStr => {
-        if (rawStr && typeof rawStr === 'string') {
-            const parts = rawStr.split('&');
-            return parts.reduce((acc, prt) => {
-                const nameVal = prt.split('=');
-                const val = nameVal[1];
-                if (val !== undefined || val !== null) val = decodeURIComponent(val);
-                acc[decodeURIComponent(nameVal[0])] = val;
-                return acc;
-            }, {});
-        }
-        return {};
-    }
-
     if (req.method.toLowerCase() === 'post') {
-        const postData = parseRowBody(req.body);
+        const postData = utils.parseRowBody(req.body);
         const seatRes = await request.post('https://acccncheckin.azurewebsites.net/api/checkin?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
         res.body = `<h1>${seatRes.responseMessage}</h1>`;
         context.res = res;
         return;
     } else { 
-        console.log(req.headers.cookie);
+        context.log(req.headers.cookie);
         // check cookie:  AcccnCheckinAuth=7706679593
-        if(!(req.headers.cookie && req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') >= 0)) {
+        if(!req.headers.cookie || req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') === -1) {
             res.body = `Bad request: unauthorized`;
             context.res = res;
             return;    
@@ -50,10 +24,11 @@ module.exports = async function (context, req) {
     }
 
     let name, email;
+    const param = req.query.param;
     if (param) {
         const queryString = CryptoJS.enc.Base64.parse(param);
         const rawQueryString = queryString.toString(CryptoJS.enc.Utf8)
-        const queryObject = parseQuery(rawQueryString);
+        const queryObject = utils.parseQuery(rawQueryString);
         name = queryObject['name'];
         email = queryObject['email'];
     }
@@ -124,6 +99,5 @@ module.exports = async function (context, req) {
     } else {
         res.body = 'Bad request: invalid params'
     }
-
     context.res = res;
 }
