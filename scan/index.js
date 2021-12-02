@@ -9,7 +9,7 @@ module.exports = async function (context, req) {
 
     if (req.method.toLowerCase() === 'post') {
         const postData = utils.parseRowBody(req.body);
-        const seatRes = await request.post('https://acccncheckin.azurewebsites.net/api/checkin?code=cpxQLsX8ZnVGxexZ6Pdszvnz7A%2F2CzQInMl9Db0IT25C5eHsC2DDjg%3D%3D').send(postData).then(r => r.body);
+        const seatRes = await request.post('https://acccncheckin.azurewebsites.net/api/checkin?code=OAJh3Hrav1Y6m3BRaPnzR8D8EEfJUNVazmaa4XU0A%2FFClbMbw6pxZg%3D%3D').send(postData).then(r => r.body);
         res.body = `<h1>${seatRes.responseMessage}</h1>`;
         context.res = res;
         return;
