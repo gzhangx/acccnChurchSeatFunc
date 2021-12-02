@@ -58,10 +58,13 @@ async function saveData() {
     );
 }
 
+let lastLoadTime = new Date().getTime();
 async function loadData() {
-    if (db.allUsers.length === 0) {
+    const curtm = new Date().getTime();
+    if (db.allUsers.length === 0 || (curtm - lastLoadTime > 10000)) {
         const vals = await db.sheet.readValues(`'${db.sheetInfo.fullSaveSheetName}'!A:C`);
         db.allUsers = vals.map(v => JSON.parse(v[2]));
+        lastLoadTime = curtm;
     }
 }
 

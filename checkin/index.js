@@ -1,6 +1,7 @@
 const util = require('./util');
 const store = require('./store');
 const actions = require('./actions');
+const { pick } = require('lodash');
 
 function parseRowBody(rawStr) {    
     if (rawStr && typeof rawStr === 'string') {
@@ -45,7 +46,11 @@ module.exports = async function (context, req) {
     
     let responseMessage = `Cant find a seat sorry ${name}`;
 
-    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
+    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `;
+    const extratCellData = cell => ({
+        name,
+        ...pick(cell, ['blkName', 'dspRow', 'dspCol', 'side', 'col', 'row']),
+    });
     const found = store.db.allUsers.find(u => u.email === email);
     const getMultiUserMsg = user => {
         const cell = user.cell;
@@ -54,6 +59,7 @@ module.exports = async function (context, req) {
         }).join(',');
         return `Dear ${name}, your seats are at ${cell.blkName}${cell.dspRow} seats ${all}`;
     }
+    let cellInfo = null;
     if (name && email && !found) {
         const user = {
             name, email, count, role,
@@ -75,6 +81,7 @@ module.exports = async function (context, req) {
                 } else {                
                     responseMessage = getMultiUserMsg(user);
                 }
+                cellInfo = res.map(extratCellData);
                 await store.saveData();
                 store.db.needBuildDisplay = true;
                 new Promise(async () => {
@@ -95,6 +102,7 @@ module.exports = async function (context, req) {
             } else {
                 responseMessage = getMultiUserMsg(found);
             }
+            cellInfo = found.cells.map(extratCellData);
         }
     }
 
@@ -104,6 +112,9 @@ module.exports = async function (context, req) {
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email, nextSunday,},
+        body: {
+            responseMessage, email, nextSunday,
+            cellInfo,
+        },
     };
 }
