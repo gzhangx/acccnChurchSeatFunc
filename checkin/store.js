@@ -365,8 +365,9 @@ async function saveDisplaySheet(util) {
 
 function getBlkAndRole(role) {
     const rolesBlks = blkConfigs.assignRoles();
-    const blks = db.blks || rolesBlks.blks;
-    db.blks = blks;
+    //const blks = db.blks || rolesBlks.blks;
+    //db.blks = blks;
+    const blks = rolesBlks.blks;
     db.pureSitConfig = rolesBlks.pureSitConfig;
     const roleObj = rolesBlks.getRole(role);
     return {blks, roleObj}
