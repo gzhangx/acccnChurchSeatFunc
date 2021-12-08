@@ -34,7 +34,8 @@ module.exports = async function (context, req) {
     const count = parseInt(getPrm('count') || 1);
     let role = getPrm('role') || util.REGULAR_USER_ROLE;
     const nextSunday = util.getNextSundays()[0];
-    
+
+    console.log(`name=${name} email=${email} count=${count} role=${role}`);
     await store.initSheet(context, nextSunday);
     await store.loadData();
 
