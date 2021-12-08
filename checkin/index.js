@@ -110,6 +110,7 @@ module.exports = async function (context, req) {
     }
 
 
+    console.log(`done, response=${responseMessage}`);
     context.res = {
         // status: 200, /* Defaults to 200 */
         headers: {
