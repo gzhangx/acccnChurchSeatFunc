@@ -69,7 +69,7 @@ async function loadData() {
     }
 }
 
-async function saveDisplaySheet(util) {
+async function saveDisplaySheet(util, blks) {
     const sheet = db.sheet;
     const allSheetInfo = db.sheetInfo.sheetInfo;
     const allUsers = db.allUsers;
@@ -148,7 +148,7 @@ async function saveDisplaySheet(util) {
     }
 
 
-    db.blks.forEach(blk => {
+    blks.forEach(blk => {
         blk.forEach(rows => {
             if (!rows) return;
             rows.forEach(cell => {

@@ -89,7 +89,7 @@ module.exports = async function (context, req) {
                 store.db.needBuildDisplay = true;
                 new Promise(async () => {
                     if (store.db.needBuildDisplay) {
-                        await store.saveDisplaySheet(util);
+                        await store.saveDisplaySheet(util, blks);
                         store.db.needBuildDisplay = false;
                     }
                 });                

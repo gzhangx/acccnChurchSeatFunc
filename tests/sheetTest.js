@@ -23,7 +23,7 @@ async function test() {
         allUsers: store.db.allUsers,
     });
     await store.saveData();
-    await store.saveDisplaySheet(util);
+    await store.saveDisplaySheet(util, blks);
 }
 
 
