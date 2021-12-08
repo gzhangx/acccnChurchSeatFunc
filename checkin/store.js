@@ -63,6 +63,7 @@ async function loadData() {
     const curtm = new Date().getTime();
     if (db.allUsers.length === 0 || (curtm - lastLoadTime > 10000)) {
         const vals = await db.sheet.readValues(`'${db.sheetInfo.fullSaveSheetName}'!A:C`);
+        console.log(`User Data reloaded, new user length ${db.allUsers.length}`);
         db.allUsers = vals.map(v => JSON.parse(v[2]));
         lastLoadTime = curtm;
     }
