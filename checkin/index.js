@@ -17,9 +17,11 @@ function parseRowBody(rawStr) {
     return {};
 }
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    context.log('checkin HTTP trigger function processed a request.');    
 
     const rawBody = parseRowBody(req.rawBody);
+    console.log(rawBody);
+    console.log('------- checkin request ----------');
     const getPrm = name => req.query[name] || (req.body && req.body[name]) || rawBody[name];
     const actionStr = getPrm('action');
     if (actionStr && actions[actionStr]) {
