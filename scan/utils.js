@@ -24,7 +24,13 @@ const parseRowBody = rawStr => {
     return {};
 };
 
+const getRoleOption = (role, expectedRole) => {
+    const selected = role === expectedRole ? 'selected' : '';
+    return `<option value="${role}" ${selected}>${role}</option>`
+};
+
 module.exports = {
     parseRowBody,
-    parseQuery
+    parseQuery,
+    getRoleOption
 }
