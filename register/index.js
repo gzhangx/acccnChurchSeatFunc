@@ -9,6 +9,6 @@ module.exports = async function (context, req) {
             'Set-Cookie': `AcccnCheckinAuth=7706679593; Path=/api; Expires=${expiresTime}`,
             'Cache-Control': 'no-cache. no-store',
         },
-        body: '<h1>cookie set expires in 2 hours<h1>'
+        body: '<h1>cookie set expires in 2 hours</h1>'
     };
 }
