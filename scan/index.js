@@ -21,14 +21,14 @@ module.exports = async function (context, req) {
         if(!req.headers.cookie || req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') === -1) {
             res.body = `<h1>Bad request: unauthorized</h1>`;
             context.res = res;
-            return;    
+            //return;    
         }
     }
 
     let name, email, role;
     let param = req.query.param;
     if (param) {
-        param = param.replace(' ', '+');
+        param = param.replace(/ /g, '+'); //replace all space with +
         try {
             const rawQueryString = Buffer.from(param, 'base64').toString('utf8');
             const queryObject = utils.parseQuery(rawQueryString);
