@@ -59,19 +59,19 @@ module.exports = async function (context, req) {
             '<label style="flex-basis: 100px;text-align:right" for="role">Role: </label>' +
             '<select id="role" name="role" style="min-width: 200px;margin:5px;padding: 5px;border-radius:5px;border: 1px solid #ccc">' +
             '<option value="会众">会众</option>' +
-            '<option value="领诗">领诗</option>' +
-            '<option value="牧师">牧师</option>' +
-            '<option value="讲员">讲员</option>' +
-            '<option value="主席">主席</option>' +
-            '<option value="报告">报告</option>' +
-            '<option value="会友">会友</option>' +
-            '<option value="新人">新人</option>' +
-            '<option value="司琴">司琴</option>' +
-            '<option value="带位">带位</option>' +
-            '<option value="接待">接待</option>' +
-            '<option value="影音">影音</option>' +
             '<option value="诗班">诗班</option>' +
             '<option value="赞美队">赞美队</option>' +
+            '<option value="新人">新人</option>' +
+            '<option value="会友">会友</option>' +
+            '<option value="领诗">领诗</option>' +
+            '<option value="主席">主席</option>' +
+            '<option value="牧师">牧师</option>' +
+            '<option value="讲员">讲员</option>' +
+            '<option value="报告">报告</option>' +
+            '<option value="司琴">司琴</option>' +
+            '<option value="影音">影音</option>' +
+            '<option value="接待">接待</option>' +
+            '<option value="带位">带位</option>' +
             '</select>' +
             '</div>' +
             '<div class="form-line">' +
