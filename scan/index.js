@@ -7,6 +7,9 @@ module.exports = async function (context, req) {
         body: ''
     };
 
+    const roles = ['会众', '诗班', '赞美队', '新人', '会友', '领诗',
+        '主席', '牧师', '讲员', '报告', '司琴', '影音', '接待', '带位'];
+
     if (req.method.toLowerCase() === 'post') {
         const postData = utils.parseRowBody(req.body);
         const seatRes = await request.post('https://acccncheckin.azurewebsites.net/api/checkin?code=OAJh3Hrav1Y6m3BRaPnzR8D8EEfJUNVazmaa4XU0A%2FFClbMbw6pxZg%3D%3D').send(postData).then(r => r.body);
@@ -14,28 +17,34 @@ module.exports = async function (context, req) {
         context.res = res;
         return;
     } else { 
-        context.log(req.headers.cookie);
         // check cookie:  AcccnCheckinAuth=7706679593
         if(!req.headers.cookie || req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') === -1) {
-            res.body = `Bad request: unauthorized`;
+            res.body = `<h1>Bad request: unauthorized</h1>`;
             context.res = res;
             return;    
         }
     }
 
-    let name, email;
-    const param = req.query.param;
+    let name, email, role;
+    let param = req.query.param;
     if (param) {
-        const queryString = CryptoJS.enc.Base64.parse(param);
-        const rawQueryString = queryString.toString(CryptoJS.enc.Utf8)
-        const queryObject = utils.parseQuery(rawQueryString);
-        name = queryObject['name'];
-        email = queryObject['email'];
+        param = param.replace(/ /g, '+'); //replace all space with +
+        try {
+            const rawQueryString = Buffer.from(param, 'base64').toString('utf8');
+            const queryObject = utils.parseQuery(rawQueryString);
+            name = queryObject['name'];
+            email = queryObject['email'];
+            role = queryObject['role'] ? queryObject['role'].replace('\n', '') : '';
+        } catch (err) {
+            res.body = `<h1>Bad request: invalid param!</h1>`;
+            context.res = res;
+            return;    
+        }
     }
 
     if (name && email) {
         const azureEnv = process.env.AZURE_FUNCTIONS_ENVIRONMENT;
-        res.body = '<html>' +
+        let resBody = '<html>' +
             '<header>' +
             '<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>' +
             '<style>' +
@@ -57,22 +66,13 @@ module.exports = async function (context, req) {
             '</div>' +
             '<div class="form-line">' +
             '<label style="flex-basis: 100px;text-align:right" for="role">Role: </label>' +
-            '<select id="role" name="role" style="min-width: 200px;margin:5px;padding: 5px;border-radius:5px;border: 1px solid #ccc">' +
-            '<option value="会众">会众</option>' +
-            '<option value="诗班">诗班</option>' +
-            '<option value="赞美队">赞美队</option>' +
-            '<option value="新人">新人</option>' +
-            '<option value="会友">会友</option>' +
-            '<option value="领诗">领诗</option>' +
-            '<option value="主席">主席</option>' +
-            '<option value="牧师">牧师</option>' +
-            '<option value="讲员">讲员</option>' +
-            '<option value="报告">报告</option>' +
-            '<option value="司琴">司琴</option>' +
-            '<option value="影音">影音</option>' +
-            '<option value="接待">接待</option>' +
-            '<option value="带位">带位</option>' +
-            '</select>' +
+            '<select id="role" name="role" style="min-width: 200px;margin:5px;padding: 5px;border-radius:5px;border: 1px solid #ccc">';
+
+        roles.forEach((thisRole) => {
+            resBody = resBody + utils.getRoleOption(thisRole, role);
+        });
+
+        resBody = resBody + '</select>' +
             '</div>' +
             '<div class="form-line">' +
             '<label style="flex-basis: 100px;text-align:right" for="party-size">Party Size: </label>' +
@@ -102,8 +102,10 @@ module.exports = async function (context, req) {
             '</div>' +
             '</body>' +
             '</html>';
+
+            res.body = resBody;
     } else {
-        res.body = 'Bad request: invalid params'
+        res.body = '<h1>Bad request: invalid params</h1>';
     }
     context.res = res;
 }
