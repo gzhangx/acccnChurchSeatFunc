@@ -21,7 +21,7 @@ module.exports = async function (context, req) {
         if(!req.headers.cookie || req.headers.cookie.indexOf('AcccnCheckinAuth=7706679593') === -1) {
             res.body = `<h1>Bad request: unauthorized</h1>`;
             context.res = res;
-            //return;    
+            return;    
         }
     }
 
