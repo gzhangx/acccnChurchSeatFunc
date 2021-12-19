@@ -19,7 +19,7 @@ const roleSits = [
         rows: ['B11'],
     },
     {
-        names: ['投影', '音效'],
+        names: ['投影', '音效','影音'],
         rows: ['E'],
     },
 ];
