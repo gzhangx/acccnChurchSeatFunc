@@ -89,9 +89,6 @@ function parseSits(pack = 2) {
         //console.log(rows.map(r => r.join('')).join('\n'));
         return {
             ...b,
-            goodRowsToUse: rows.map((r, i) => {
-                return !(i % pack) //|| i === rows.length - 1
-            }),
             sits: rows,
         };
     });
@@ -154,7 +151,9 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
     });
     let found = null;
     let badBlkCount = 0;
-    for (let rowi = 0; badBlkCount < blks.length; rowi++) {            
+    const MAXROW = 12;
+    for (let rowic = 0; badBlkCount < blks.length; rowic++) {
+        const rowi = rowic < MAXROW ? rowic * 2 + 1 : (rowic - MAXROW) * 2;
         let possible = [];
         let spots = [];
         let possibleCount = 0;
@@ -164,7 +163,8 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
             spots = [];
             const curRow = curBlk[rowi];
             if (!curRow) {
-                badBlkCount++;                
+                if (rowi > MAXROW)
+                    badBlkCount++;                
                 continue;
             }
             let leftFromPossibleCandidate = spacing;
@@ -224,7 +224,11 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
                 return found;
             }
         }
-        if (rowi < 10) rowi++;
+    }
+    if (!found) {
+        user.cells = [];
+        user.unableToSit = true;
+        allUsers.push(user);
     }
     return found;
 }
