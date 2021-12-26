@@ -58,14 +58,18 @@ async function saveData() {
     );
 }
 
+let lastLoadTime = new Date().getTime();
 async function loadData() {
-    if (db.allUsers.length === 0) {
+    const curtm = new Date().getTime();
+    if (db.allUsers.length === 0 || (curtm - lastLoadTime > 10000)) {
         const vals = await db.sheet.readValues(`'${db.sheetInfo.fullSaveSheetName}'!A:C`);
+        console.log(`User Data reloaded, new user length ${db.allUsers.length}`);
         db.allUsers = vals.map(v => JSON.parse(v[2]));
+        lastLoadTime = curtm;
     }
 }
 
-async function saveDisplaySheet(util) {
+async function saveDisplaySheet(util, blks) {
     const sheet = db.sheet;
     const allSheetInfo = db.sheetInfo.sheetInfo;
     const allUsers = db.allUsers;
@@ -144,7 +148,7 @@ async function saveDisplaySheet(util) {
     }
 
 
-    db.blks.forEach(blk => {
+    blks.forEach(blk => {
         blk.forEach(rows => {
             if (!rows) return;
             rows.forEach(cell => {
@@ -361,8 +365,9 @@ async function saveDisplaySheet(util) {
 
 function getBlkAndRole(role) {
     const rolesBlks = blkConfigs.assignRoles();
-    const blks = db.blks || rolesBlks.blks;
-    db.blks = blks;
+    //const blks = db.blks || rolesBlks.blks;
+    //db.blks = blks;
+    const blks = rolesBlks.blks;
     db.pureSitConfig = rolesBlks.pureSitConfig;
     const roleObj = rolesBlks.getRole(role);
     return {blks, roleObj}

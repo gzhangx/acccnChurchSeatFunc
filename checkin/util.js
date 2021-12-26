@@ -172,9 +172,10 @@ function tryAddUser({ blks, user, allUsers, spacing = 2 }) {
             for (let ci = 0; ci < curRow.length; ci++) {
                 const cell = curRow[ci];                
                 if (!cell) continue;
-                if (user.role !== cell.role) {
-                    const usrRoleHasReq = user.role && user.role !== REGULAR_USER_ROLE;
-                    if (!!cell.role || usrRoleHasReq) continue;
+                const usrRoleHasReq = user.role && user.role !== REGULAR_USER_ROLE;
+                if (usrRoleHasReq && !cell.roles) continue;
+                if (cell.roles && !cell.roles[user.role]) {                    
+                    continue;
                 }
                 cell.accessPos = { b: blki, r: rowi, c: ci };
                 if (!cell.user) {

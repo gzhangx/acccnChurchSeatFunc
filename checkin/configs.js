@@ -1,15 +1,29 @@
 
 const util = require('./util');
 
-const roleSits = {
-    '主席': 'C0',
-    '司琴': 'A0',
-    '帶位': 'B11',
-    '牧師': 'C0',
-    '投影': 'E',
-    '音效': 'E',
-    '诗班': 'B0-7',
-}
+const roleSits = [
+    {
+        names: ['主席', '讲员', '报告', '牧師'],
+        rows: ['C0', 'D0'],
+    },
+    {
+        names: ['司琴',],
+        rows: ['A0',],
+    },
+    {
+        names: ['诗班', '赞美队'],
+        rows: ['B0-7'],
+    },
+    {
+        names: ['带位'],
+        rows: ['B11'],
+    },
+    {
+        names: ['投影', '音效','影音'],
+        rows: ['E'],
+    },
+];
+
 
 function assignRoles() {
     const inited = util.initParms();    
@@ -29,33 +43,38 @@ function assignRoles() {
             }
         }
     };
-    const parsedRoles = Object.keys(roleSits).map(role => {
-        const pos = roleSits[role];
-        const id = util.blkLetterToId[pos[0]]
-        const rows = pos.substr(1);
-        
-        if (id === undefined) {
-            return {
-                role,
-                noSeat: true, //for sound and IT etc
-            }
-        }
-        
-        return {
-            blkId: id,
-            rows: toRowStartEnd(rows),
-            role,
-            noSeat: false,
-        }
-    });
+    const parsedRoles = roleSits.reduce((acc, itm) => {
+        itm.names.forEach(role => {
+            itm.rows.forEach(pos => {
+                const id = util.blkLetterToId[pos[0]]
+                const rows = pos.substr(1);
+
+                if (id === undefined) {
+                    return acc.push({
+                        role,
+                        noSeat: true, //for sound and IT etc
+                    });
+                }
+
+                acc.push({
+                    blkId: id,
+                    rows: toRowStartEnd(rows),
+                    role,
+                    noSeat: false,
+                });
+            });
+        });        
+        return acc;
+    },[]);
 
     parsedRoles.forEach(pw => {
         const { blkId, role, rows, noSeat } = pw;
         if (noSeat) return;
         const blk = blks[blkId];
         for (let i = rows.start; i <= rows.end; i++) {
-            blk[i].filter(x=>x).forEach(c => {                
-                c.role = role;
+            blk[i].filter(x => x).forEach(c => {
+                if (!c.roles) c.roles = {};
+                c.roles[role] = true;
             });
         }
     });

@@ -1,6 +1,7 @@
 const util = require('./util');
 const store = require('./store');
 const actions = require('./actions');
+const { pick } = require('lodash');
 
 function parseRowBody(rawStr) {    
     if (rawStr && typeof rawStr === 'string') {
@@ -16,9 +17,11 @@ function parseRowBody(rawStr) {
     return {};
 }
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    context.log('checkin HTTP trigger function processed a request.');    
 
     const rawBody = parseRowBody(req.rawBody);
+    console.log(rawBody);
+    console.log('------- checkin request ----------');
     const getPrm = name => req.query[name] || (req.body && req.body[name]) || rawBody[name];
     const actionStr = getPrm('action');
     if (actionStr && actions[actionStr]) {
@@ -31,7 +34,8 @@ module.exports = async function (context, req) {
     const count = parseInt(getPrm('count') || 1);
     let role = getPrm('role') || util.REGULAR_USER_ROLE;
     const nextSunday = util.getNextSundays()[0];
-    
+
+    console.log(`name=${name} email=${email} count=${count} role=${role}`);
     await store.initSheet(context, nextSunday);
     await store.loadData();
 
@@ -45,7 +49,11 @@ module.exports = async function (context, req) {
     
     let responseMessage = `Cant find a seat sorry ${name}`;
 
-    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `
+    const showCellStr = cell => `Dear ${name}, your seat is ${cell.blkName}${cell.dspRow}, seat ${cell.dspCol} from ${cell.side === 'L' ? 'Left' : 'Right'} `;
+    const extratCellData = cell => ({
+        name,
+        ...pick(cell, ['blkName', 'dspRow', 'dspCol', 'side', 'col', 'row']),
+    });
     const found = store.db.allUsers.find(u => u.email === email);
     const getMultiUserMsg = user => {
         const cell = user.cell;
@@ -54,6 +62,7 @@ module.exports = async function (context, req) {
         }).join(',');
         return `Dear ${name}, your seats are at ${cell.blkName}${cell.dspRow} seats ${all}`;
     }
+    let cellInfo = null;
     if (name && email && !found) {
         const user = {
             name, email, count, role,
@@ -75,11 +84,12 @@ module.exports = async function (context, req) {
                 } else {                
                     responseMessage = getMultiUserMsg(user);
                 }
+                cellInfo = res.map(extratCellData);
                 await store.saveData();
                 store.db.needBuildDisplay = true;
                 new Promise(async () => {
                     if (store.db.needBuildDisplay) {
-                        await store.saveDisplaySheet(util);
+                        await store.saveDisplaySheet(util, blks);
                         store.db.needBuildDisplay = false;
                     }
                 });                
@@ -95,15 +105,20 @@ module.exports = async function (context, req) {
             } else {
                 responseMessage = getMultiUserMsg(found);
             }
+            cellInfo = found.cells.map(extratCellData);
         }
     }
 
 
+    console.log(`done, response=${responseMessage}`);
     context.res = {
         // status: 200, /* Defaults to 200 */
         headers: {
             'content-type': 'application/json; charset=utf-8'
         },
-        body: { responseMessage, email, nextSunday,},
+        body: {
+            responseMessage, email, nextSunday,
+            cellInfo,
+        },
     };
 }
